@@ -12,8 +12,9 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hook-form": "^6.5.1",
-    "react-notifications": "^1.6.0",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "react-toast-notifications": "^2.4.0",
+    "react-transition-group": "^4.4.1"
   },
   "scripts": {
     "start": "npm run watch:css && react-scripts start",
@@ -40,7 +41,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^9.8.6",
-    "eslint": "^7.7.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^11.1.0",

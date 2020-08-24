@@ -1,23 +1,50 @@
 import React, { useState } from 'react'
-import { CardElement, useStripe, useElements, Elements } from '@stripe/react-stripe-js'
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useForm } from 'react-hook-form'
 
-import PostalCodes from 'postal-codes-js'
+import { useToasts, ToastProvider } from 'react-toast-notifications'
+
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
+
+import PostalCodes from 'postal-codes-js';
 
 const textInputClass = 'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500'
 const errClass = 'text-red-500 text-xs italic absolute right-0 bottom-0 p-px'
 
-export default ({ stripePromise }) => {
+const CARD_OPTIONS = {
+    iconStyle: 'solid',
+    style: {
+        base: {
+            fontWeight: 500,
+            fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
+            fontSize: '20px',
+            fontSmoothing: 'antialiased',
+        },
+    },
+};
+
+export default () => {
     const [step, setStep] = useState(1)
+
+    const { addToast } = useToasts()
 
     const { register, handleSubmit, handleChange, getValues, errors } = useForm()
 
+    const stripe = useStripe();
+    const elements = useElements();
+
     const step1 = data => {
-        console.log(data);
+        console.log(errors);
+        setStep(2)
+        addToast("Success! Moving to Step 2!", { appearance: 'success', autoDismiss: true })
     }
 
     return (
         <>
+            <div>
+                <button onClick={() => { setStep(1) }}>Step1</button>
+                <button onClick={() => { setStep(2) }}>Step 2</button>
+            </div>
             <article
                 className="w-full flex flex-col items-center justify-start p-5 bg-white shadow-md rounded">
                 <div
@@ -53,8 +80,8 @@ export default ({ stripePromise }) => {
                     >
                         <section className="flex flex-wrap -mx-3 my-3">
                             <label
-                                className="w-full px-3 mb-3 block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                                htmlFor="grid-password">
+                                className="classNaw-full px-3 mb-3 block uppercase tracking-wide text-gray-700 text-xs font-bold text-left"
+                            >
                                 Contact
                         </label>
                             <div className="w-full px-3 mb-3 relative">
@@ -98,8 +125,8 @@ export default ({ stripePromise }) => {
 
                         <section className="flex flex-wrap -mx-3 my-3">
                             <label
-                                className="w-full px-3 mb-3 block uppercase tracking-wide text-gray-700 text-xs font-bold"
-                                htmlFor="grid-password">
+                                className="classNaw-full px-3 mb-3 block uppercase tracking-wide text-gray-700 text-xs font-bold text-left"
+                            >
                                 Shipping
                         </label>
                             <div className="w-full px-3 mb-3 relative">
@@ -122,7 +149,7 @@ export default ({ stripePromise }) => {
                                     placeholder="City"
                                     className={`${textInputClass} ${errors.city ? 'border-red-500' : ''}`}
                                     onChange={handleChange}
-                                    ref={register({required: true})}
+                                    ref={register({ required: true })}
                                 />
                                 {errors.city &&
                                     <p className={errClass}>City required</p>
@@ -136,7 +163,7 @@ export default ({ stripePromise }) => {
                                     placeholder="State/Province"
                                     className={`${textInputClass} ${errors.state ? 'border-red-500' : ''}`}
                                     onChange={handleChange}
-                                    ref={register({required: true})}
+                                    ref={register({ required: true })}
                                 />
                                 {errors.state &&
                                     <p className={errClass}>Valid State required</p>
@@ -149,9 +176,11 @@ export default ({ stripePromise }) => {
                                     placeholder="Postal Code"
                                     className={`${textInputClass} ${errors.postal ? 'border-red-500' : ''}`}
                                     onChange={handleChange}
-                                    ref={register({required: true, validate: value => {
-                                        return PostalCodes.validate(getValues().country, value)
-                                    }})}
+                                    ref={register({
+                                        required: true, validate: value => {
+                                            return PostalCodes.validate(getValues().country, value)
+                                        }
+                                    })}
                                 />
                                 {errors.postal &&
                                     < p className={errClass}>Postal code required</p>
@@ -165,7 +194,7 @@ export default ({ stripePromise }) => {
                 border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded
                 leading-tight focus:outline-none focus:bg-white
                 focus:border-gray-500"
-                                        ref={register({required: true})}
+                                        ref={register({ required: true })}
                                         onChange={handleChange}
                                         id="country"
                                         name="country">
@@ -197,10 +226,30 @@ export default ({ stripePromise }) => {
                       </p>
                     </form>
                 }
+                {
+                    step == 2 &&
+                    <form className="w-full">
+                        <div className="w-full py-10">
+                            <label
+                                className="block uppercase tracking-wide text-gray-700 text-xs
+              font-bold mb-2 text-left"
+                            >
+                                Credit or debit card
+                            </label>
+                            <div className="flex flex-wrap mb-6">
+                                <div className="w-full" id="card-element">
+                                    < CardElement options={CARD_OPTIONS} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4
+            rounded`} type="submit" disabled={!stripe}>
+                            Pay
+                        </button>
+                    </form>
+                }
             </article>
-            <Elements stripe={stripePromise}>
-                < CardElement />
-            </Elements>
         </>
     )
 }
