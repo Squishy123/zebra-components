@@ -1,25 +1,27 @@
 import React from 'react';
 import './App.css';
 
-import { useToasts, ToastProvider } from 'react-toast-notifications'
-
-import Entryform from './components/EntryForm';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
+import Entryform from './components/CheckoutForm';
 import ZebraSetup from './components/ZebraSetup';
+import AddItem from './components/AddItem';
+
+import { v4 as uuid } from 'uuid';
 
 
 function App() {
-    const stripePromise = loadStripe(`pk_test_51GuNRZDB4q9SlwjvYeV7l2LfpGeHlELwxIojSuB7OXrCzNgK9sPcRTKtLv9bYBYbrFN40IiuCFLIdnASPd4pWeDO00pYjFlOPw`)
-
     return (
         <div className="App">
-            <ToastProvider autoDismissTimeout={3000}>
-                <Elements stripe={stripePromise}>
-                    <ZebraSetup />
-                    <Entryform />
-                </Elements>
-            </ToastProvider>
+            <ZebraSetup stripeKey="pk_test_51GuNRZDB4q9SlwjvYeV7l2LfpGeHlELwxIojSuB7OXrCzNgK9sPcRTKtLv9bYBYbrFN40IiuCFLIdnASPd4pWeDO00pYjFlOPw">
+                <AddItem items={[{
+                    id: uuid(),
+                    name: "3-Pack Warsh Cloth",
+                    price: 19.99,
+                    shipping: 5.0,
+                    thumb: "assets/cloth.jpg",
+                    stripe_price_id: "price_1H0sTXDB4q9SlwjvR8mAbVVc"
+                }]}/>
+                <Entryform />
+            </ZebraSetup>
         </div>
     );
 }

@@ -1,10 +1,14 @@
+/**
+ * CheckoutForm to checkout items in cart
+ * UpsellItems can be passed in as a prop
+ */
 import React, { useState } from 'react'
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { useForm } from 'react-hook-form'
 
 import { useToasts, ToastProvider } from 'react-toast-notifications'
 
-import { CSSTransition, TransitionGroup } from 'react-transition-group'
+import {useCart} from 'react-use-cart';
 
 import PostalCodes from 'postal-codes-js';
 
@@ -17,13 +21,23 @@ const CARD_OPTIONS = {
         base: {
             fontWeight: 500,
             fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
-            fontSize: '20px',
+            fontSize: '18px',
             fontSmoothing: 'antialiased',
         },
     },
 };
 
-export default () => {
+export default ({upsellItems}) => {
+    const {
+        isEmpty,
+        totalUniqueItems,
+        items,
+        updateItemQuantity,
+        removeItem,
+      } = useCart();
+
+    console.log(items)
+
     const [step, setStep] = useState(1)
 
     const { addToast } = useToasts()
@@ -42,7 +56,7 @@ export default () => {
     return (
         <>
             <div>
-                <button onClick={() => { setStep(1) }}>Step1</button>
+                <button onClick={() => { setStep(1) }}>Step 1</button>
                 <button onClick={() => { setStep(2) }}>Step 2</button>
             </div>
             <article
