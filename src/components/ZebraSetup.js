@@ -55,7 +55,7 @@ export default ({ children, stripeKey }) => {
     const stripePromise = loadStripe(stripeKey)
     return <>
         <ToastProvider autoDismissTimeout={3000}>
-            <CartProvider storage={useTempStorage} id="tempStorageCart">
+            <CartProvider storage={useTempStorage} id="tempStorage">
                 <Elements stripe={stripePromise}>
                     {children}
                 </Elements>

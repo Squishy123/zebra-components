@@ -8,12 +8,19 @@ import { useForm } from 'react-hook-form'
 
 import { useToasts, ToastProvider } from 'react-toast-notifications'
 
-import {useCart} from 'react-use-cart';
+import { useCart } from 'react-use-cart';
 
 import PostalCodes from 'postal-codes-js';
 
+import { v4 as uuid } from 'uuid';
+
+import { generateCustomerToken } from './ZebraActions'
+
 const textInputClass = 'appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500'
 const errClass = 'text-red-500 text-xs italic absolute right-0 bottom-0 p-px'
+
+const ZEBRA_HOST = 'http://localhost:3000'
+
 
 const CARD_OPTIONS = {
     iconStyle: 'solid',
@@ -27,16 +34,15 @@ const CARD_OPTIONS = {
     },
 };
 
-export default ({upsellItems}) => {
+export default ({ orderBumps }) => {
     const {
         isEmpty,
         totalUniqueItems,
         items,
         updateItemQuantity,
         removeItem,
-      } = useCart();
-
-    console.log(items)
+        addItem,
+    } = useCart();
 
     const [step, setStep] = useState(1)
 
@@ -47,8 +53,25 @@ export default ({upsellItems}) => {
     const stripe = useStripe();
     const elements = useElements();
 
-    const step1 = data => {
-        console.log(errors);
+    // zebra data stuff
+    const [customer_token, setCustomerToken] = useState("");
+
+    const step1 = async data => {
+        let customerToken = await generateCustomerToken({
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            shipping: {
+                address: {
+                    line1: data.address,
+                    country: data.country,
+                    postal_code: data.postal,
+                    state: data.state
+                },
+                name: data.name
+            }
+        }, ZEBRA_HOST);
+        console.log(customerToken)
         setStep(2)
         addToast("Success! Moving to Step 2!", { appearance: 'success', autoDismiss: true })
     }
@@ -261,6 +284,37 @@ export default ({upsellItems}) => {
             rounded`} type="submit" disabled={!stripe}>
                             Pay
                         </button>
+                        {orderBumps.map(bump => (
+                            <div className="flex flex-wrap my-3 border-4 border-dashed border-gray-600" key={uuid()}>
+                                <label
+                                    className="w-full block bg-orange-200 flex justify-between items-center p-4">
+                                    <input className="leading-tight" type="checkbox" />
+                                    <span className="text-lg font-bold">
+                                        <span className="text-red-600">Yes! </span>
+                                        <span className="text-green-600">Add 2 for 1 Men's Warsh Cloth</span>
+                                    </span>
+                                    <span className="text-lg">$24.99</span>
+                                </label>
+                                <div className="w-full flex flex-wrap sm:flex-no-wrap p-4">
+                                    <div className="w-full sm:w-1/2">
+                                        <img src="assets/mens-cloth.png" alt="mens cloth" />
+                                    </div>
+                                    <div className="w-full sm:w-1/2">
+                                        <p className="text-lg font-bold mb-5">THE WARSH CLOTH™ FOR HIM</p>
+                                        <p className="font-semibold mb-5">
+                                            Reenergize, cleanse, and exfoliate your face all in one!
+     </p>
+                                        <p className="mb-5">
+                                            Use plain water and the WARSH Cloth before and after your shave
+                                            - and last thing at night or when you start to feel grimy--to
+                                            clean up fast and look great. Don't over dry and age your skin
+                                            with soap.
+     </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                        }
                     </form>
                 }
             </article>
